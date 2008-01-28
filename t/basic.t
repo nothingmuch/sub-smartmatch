@@ -39,3 +39,30 @@ def_multi foo => (
 is( foo(0),    "all args",  "exactly matches" );
 is( foo(0, 1), "first arg", "matches slice" );
 is( foo(1),    "default",   "matches default" );
+
+SKIP: {
+	skip "No SmartMatch::Sugar", 5 unless eval { require SmartMatch::Sugar };
+
+	{
+		package Foo;
+
+		SmartMatch::Sugar->import(qw(object class));
+
+		use Sub::SmartMatch;
+
+		multi is_object => [ object() ] => sub { 1 };
+		multi is_object => [ class()  ]  => sub { 0 };
+	}
+
+	my $foo = bless {}, "Foo";
+
+	ok( $foo->is_object, "object is an object" );
+	ok( $foo->is_object(qw(blah blah blah)), "object is an object even with superflous args" );
+	ok( not(Foo->is_object), "the class is not an object though" );
+
+	eval { Foo::is_object() };
+	my $e = $@;
+	ok( $e, "got an error from calling with no args" );
+	like( $e, qr/no variant found/i, "no variant found error" );
+}
+
