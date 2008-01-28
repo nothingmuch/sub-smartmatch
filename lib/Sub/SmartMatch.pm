@@ -14,7 +14,7 @@ our $VERSION = "0.01";
 
 use base qw(Exporter);
 
-our @EXPORT = our @EXPORT_OK = qw(multi multi_default def_multi);
+our @EXPORT = our @EXPORT_OK = qw(multi multi_default def_multi exactly);
 
 
 
@@ -30,6 +30,16 @@ BEGIN {
 	};
 
 	*subname = sub { $_[1] } unless defined &subname;
+}
+
+sub exactly ($) {
+	my $value = shift;
+
+	if ( ref($value) and ref($value) eq 'ARRAY' ) {
+		bless \$value, __PACKAGE__ . "::Exact";
+	} else {
+		return $value;
+	}
 }
 
 # guess the fully qualified name for a sub using caller()
@@ -67,7 +77,14 @@ sub multi ($$$) {
 
 	def_multi($name);
 
-	push @{ $variants{$name} }, [ $case, $body ];
+	my $exact = ref($case) && ref($case) eq __PACKAGE__ . "::Exact";
+	$case = $$case if $exact;
+
+	my $partial_match = not($exact) && ref($case) && ref($case) eq 'ARRAY';
+
+	push @{ $variants{$name} }, [ $partial_match, $case, $body ];
+
+	return $body;
 }
 
 sub multi_default ($$) {
@@ -93,8 +110,15 @@ sub def_multi ($;@) {
 		my $sub = sub {
 			given ( \@_ ) {
 				foreach my $variant ( @variants ) {
-					my ( $case, $body ) = @$variant;
-					when ( $case ) { goto $body }
+					my ( $partial, $case, $body ) = @$variant;
+
+					if ( $partial ) {
+						given ( [ @_[0 .. $#$case] ] ) {
+							when ( $case ) { goto $body }
+						}
+					} else {
+						when ( $case ) { goto $body }
+					}
 				}
 
 				default {
@@ -176,12 +200,24 @@ This doesn't do argument binding, just value matching.
 
 =over 4
 
+=item exactly $case
+
+This marks this case for exact matching. This means that it will match on
+C<\@_>, not on the slice C<<[ @_[0 .. $#$case] ]>>.
+
+This only applies to cases which are array references themselves.
+
 =item multi $name, $case, &body
 
 Define a variant for the sub name C<$name>.
 
 C<$case> will be smartmatched against an array reference of the arguments to
 the subroutine.
+
+As a special case to allow variable arguments at the end of the list, if
+C<$case> is an array reference it will only be matched against the slice of
+C<@_> with the corresponding number of elements, not all of C<@_>. Use
+C<exactly> to do a match on all of C<@_>.
 
 =item multi_default $name, &body
 
@@ -197,18 +233,6 @@ Define a multi sub in one go.
 		...     => ...,
 		default => $default,
 	);
-
-Is pretty much
-
-	use 5.010;
-
-	sub foo {
-		given ( \@_ ) {
-			when ( $case ) { goto $body }
-			when ( ... )   { goto ... }
-			default { goto $default }
-		}
-	}
 
 =back
 

@@ -30,3 +30,12 @@ def_multi other_fact => (
 
 is( other_fact(5), 120, "multi_default" );
 
+def_multi foo => (
+	exactly [0] => sub { "all args" },
+	[0]         => sub { "first arg" },
+	default     => sub { "default" },
+);
+
+is( foo(0),    "all args",  "exactly matches" );
+is( foo(0, 1), "first arg", "matches slice" );
+is( foo(1),    "default",   "matches default" );
