@@ -196,6 +196,17 @@ smartmatch operator.
 
 This doesn't do argument binding, just value matching.
 
+To define methods use C<SmartMatch::Sugar>'s C<object> test:
+
+	multi new [ class, args ] => sub {
+		 # invoked as a class method
+	}
+
+	multi new [ object, args ] => sub {
+		# invoked as an object method
+		# this should clone, i guess
+	}
+
 =head1 EXPORTS
 
 =over 4
