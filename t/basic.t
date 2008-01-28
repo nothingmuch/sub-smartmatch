@@ -51,7 +51,7 @@ SKIP: {
 		use Sub::SmartMatch;
 
 		multi is_object => [ object() ] => sub { 1 };
-		multi is_object => [ class()  ]  => sub { 0 };
+		multi is_object => [ class()  ] => sub { 0 };
 	}
 
 	my $foo = bless {}, "Foo";
