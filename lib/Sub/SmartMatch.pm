@@ -80,7 +80,7 @@ sub multi ($$$) {
 	my $exact = ref($case) && ref($case) eq __PACKAGE__ . "::Exact";
 	$case = $$case if $exact;
 
-	my $partial_match = not($exact) && ref($case) && ref($case) eq 'ARRAY';
+	my $partial_match = not($exact) && ref($case) && ref($case) eq 'ARRAY' && @$case;
 
 	push @{ $variants{$name} }, [ $partial_match, $case, $body ];
 
@@ -228,7 +228,8 @@ the subroutine.
 As a special case to allow variable arguments at the end of the list, if
 C<$case> is an array reference it will only be matched against the slice of
 C<@_> with the corresponding number of elements, not all of C<@_>. Use
-C<exactly> to do a match on all of C<@_>.
+C<exactly> to do a match on all of C<@_>. This does not apply to an empty array
+(otherwise that would always match, instead of matching empty arrays).
 
 =item multi_default $name, &body
 
