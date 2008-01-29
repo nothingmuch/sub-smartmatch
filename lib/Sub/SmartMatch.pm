@@ -10,7 +10,7 @@ use 5.010;
 use Carp qw(croak);
 use Scalar::Util qw(reftype);
 
-our $VERSION = "0.01";
+our $VERSION = "0.02";
 
 use base qw(Exporter);
 
