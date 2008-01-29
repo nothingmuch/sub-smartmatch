@@ -1,0 +1,6 @@
+0.02
+	- When matching on an empty array [ ] an empty slice from @_ is not used as
+	  that will always match.
+
+0.01
+	- Initial version
