@@ -7,9 +7,11 @@ use Test::More 'no_plan';
 
 use ok 'Sub::SmartMatch';
 
+sub any () { sub { 1 } }
+
 multi "fact", [ 0 ], sub { 1 };
 
-multi "fact", sub () { 1 }, sub {
+multi "fact", any, sub {
 	my $n = shift;
 	return $n * fact($n - 1);
 };
