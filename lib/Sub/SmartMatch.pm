@@ -250,7 +250,7 @@ Define a multi sub in one go.
 
 =head1 SEE ALSO
 
-L<SmartMatch::Sugar>, L<Sub::PatternMatch>, L<perlsyn>, L<Class::Multimethods::Pure>
+L<SmartMatch::Sugar>, L<Sub::PatternMatching>, L<perlsyn>, L<Class::Multimethods::Pure>
 
 =head1 VERSION CONTROL
 
